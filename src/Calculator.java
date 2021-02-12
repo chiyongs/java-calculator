@@ -1,8 +1,13 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 public class Calculator extends JFrame{
   private JTextField inputSpace;
+  private String num = "";
+  private ArrayList<String> equation = new ArrayList<String>();
 
   public static void main(String[] arg){
     new Calculator();
@@ -32,16 +37,82 @@ public class Calculator extends JFrame{
       buttons[i].setForeground(Color.WHITE);
       buttons[i].setBorderPainted(false);
       buttons[i].setOpaque(true);
+      buttons[i].addActionListener(new PadActionListener());
       buttonPanel.add(buttons[i]);
     }
+
     add(inputSpace);
     add(buttonPanel);
+
     setTitle("Calculator");
     setVisible(true);
     setSize(290,370);
     setLocationRelativeTo(null);
     setResizable(false);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+  }
+
+  class PadActionListener implements ActionListener{
+    public void actionPerformed(ActionEvent e) {
+      String operation = e.getActionCommand();
+      if (operation.equals("C")){
+        inputSpace.setText("");
+      } else if (operation.equals("=")){
+        String result = Double.toString(calculate(inputSpace.getText()));
+        inputSpace.setText(""+result);
+        num = "";
+      } else {
+        inputSpace.setText(inputSpace.getText() + e.getActionCommand());
+      }
+    }
+  }
+
+  private void fullTextParsing(String inputText){
+    equation.clear();
+    for (int i = 0; i< inputText.length(); i++) {
+      char ch = inputText.charAt(i);
+      if (ch == '-' || ch == '+' || ch == 'x' || ch == '÷') {
+        equation.add(num);
+        num = "";
+        equation.add(ch + "");
+      } else {
+        num = num + ch;
+      }
+    }
+    equation.add(num);
+  }
+
+  public double calculate(String inputText){
+    fullTextParsing(inputText);
+
+    double prev = 0;
+    double current = 0;
+    String mode = "";
+    for (String s: equation){
+      if(s.equals("+")){
+        mode = "add";
+      } else if (s.equals("-")){
+        mode = "sub";
+      } else if (s.equals("x")){
+        mode = "mul";
+      } else if (s.equals("÷")){
+        mode = "div";
+      } else {
+        current = Double.parseDouble(s);
+        if (mode == "add"){
+          prev += current;
+        } else if (mode == "sub"){
+          prev -= current;
+        } else if (mode == "mul"){
+          prev *= current;
+        } else if (mode == "div"){
+          prev /= current;
+        } else {
+          prev = current;
+        }
+      }
+    }
+    return prev;
   }
 
 }
